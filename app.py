@@ -1,13 +1,52 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, url_for, redirect
 from pymongo import MongoClient
+from bson.objectid import ObjectId
 
 app = Flask(__name__)
 client=MongoClient("mongodb://localhost", 27017)
+#client=MongoClient("mongodb://localhost", 27017, username='username', password='password')
 db=client.wooseongweb
+todos = db.todos
 
-@app.route("/")
+#test_collection = db.client.wooseongweb
+#db=connection["wooseongweb"]
+#client = MongoClient("mongodb://%s:%s@localhost" % 27017)
+@app.route("/", methods=('GET', 'POST'))
 def index():
-	return render_template('index.html')
+    if request.method=='POST':
+        content = request.form['content']
+        degree = request.form['degree']
+        todos.insert_one({'content':content, 'degree':degree})
+        return redirect(url_for('index'))
+
+    all_todos = todos.find()
+    print(todos)
+    return render_template('index.html', todos=all_todos)
+
+
+@app.route("/view")
+def view():
+    #idx = request.args.get("idx") #id대용 예약어 : idx
+    #print(db)
+    #print(dir(db))
+    #print(db.name)
+    
+    '''
+    post = {
+        "Name" : name, 
+        "title" : title, 
+        "contents":contents
+        }
+    db.testboard.insert_one(post)
+    print(post)'''
+
+
+
+    #post_id = db.testboard.insert_one(post).inserted_id
+    #print(post_id)
+    return render_template("view.html")
+
+
 
 @app.route("/write", methods=["GET", "POST"])
 def write():
@@ -22,13 +61,23 @@ def write():
             "title":title,
             "contents":contents
         }
-        db.boaard.insert_one(inf)
+        db.board.insert_one(inf)
         
         print(name, title, contents)
         
         return ""
     else:
         return render_template("write.html")
+
+@app.route("/crawler_result", methods={"POST"})
+def result():
+    if request.method == 'POST':
+        pass
+    else:
+        pass
+
+        return render_template('result.html')
+
 
 if __name__ == "__main__":
     app.run(debug=True)
