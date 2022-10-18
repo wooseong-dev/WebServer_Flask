@@ -13,15 +13,20 @@ todos = db.todos
 #client = MongoClient("mongodb://%s:%s@localhost" % 27017)
 @app.route("/", methods=('GET', 'POST'))
 def index():
-    if request.method=='POST':
+    if request.method == 'POST':
         content = request.form['content']
         degree = request.form['degree']
-        todos.insert_one({'content':content, 'degree':degree})
+        todos.insert_one({'content' : content, 'degree' : degree})
         return redirect(url_for('index'))
 
     all_todos = todos.find()
-    print(todos)
     return render_template('index.html', todos=all_todos)
+
+#@app.post("/login")는 의 바로 가기입니다 . #3907@app.route("/login", methods=["POST"])
+@app.post('/<id>/delete/')
+def delete(id):
+    todos.delete_one({"_id" : ObjectId(id)})
+    return redirect(url_for('index'))
 
 
 @app.route("/view")
