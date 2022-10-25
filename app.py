@@ -7,6 +7,7 @@ client=MongoClient("mongodb://localhost", 27017)
 #client=MongoClient("mongodb://localhost", 27017, username='username', password='password')
 db=client.wooseongweb
 todos = db.todos
+check_email = db.signup
 
 #test_collection = db.client.wooseongweb
 #db=connection["wooseongweb"]
@@ -27,6 +28,28 @@ def index():
 def delete(id):
     todos.delete_one({"_id" : ObjectId(id)})
     return redirect(url_for('index'))
+
+@app.route("/login", methods=["GET", "POST"])
+def login_write():
+    if request.method == "POST":
+        email = request.form.get("email", type=str)
+        pw = request.form.get("pw", type=str)
+
+        if email =="":
+            flash("Please input Email")
+            return render_template('login.html')
+        elif pw =="":
+            flash("Please input pw")
+            return render_template('login.html')
+        
+        check_email.insert_one({"email" : email,"pw" : pw})
+
+        return render_template('login.html')
+    else:
+        return render_template('login.html')
+
+
+        
 
 
 @app.route("/view")
